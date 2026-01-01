@@ -1,0 +1,379 @@
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>এডমিন প্যানেল</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Arial', sans-serif; }
+        .nav-pills .nav-link { cursor: pointer; font-weight: bold; background: #fff; border: 1px solid #ddd; color: #555; margin: 0 5px; border-radius: 5px; }
+        .nav-pills .nav-link.active { background-color: #198754 !important; color: white !important; border-color: #198754; }
+
+        .slider-thumb { position: relative; display: inline-block; margin: 5px; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .slider-thumb img { width: 120px; height: 70px; object-fit: cover; }
+        .btn-del { position: absolute; top: -5px; right: -5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; font-size: 12px; cursor: pointer; }
+
+        /* Category Grid */
+        #catList { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; }
+        .cat-thumb { position: relative; width: 110px; background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .cat-thumb img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; }
+        .cat-thumb span { display: block; font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-action-group { display: flex; justify-content: space-between; margin-top: 5px; }
+        .btn-mini { font-size: 10px; padding: 2px 5px; }
+
+        .table-container { max-height: 500px; overflow-y: auto; }
+        .post-img-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay"><div class="spinner-border text-success"></div><h4 class="mt-3 text-success">অপেক্ষা করুন...</h4></div>
+
+    <div class="container-fluid py-3">
+        <h3 class="text-center fw-bold text-success mb-4">এডমিন প্যানেল</h3>
+
+        <ul class="nav nav-pills nav-fill mb-3 bg-white p-2 rounded shadow-sm mx-3">
+            <li class="nav-item"><a class="nav-link active" onclick="switchTab('tab-home', this)">🏠 হোম</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-menu', this)">☰ মেনু</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-post', this)">📝 পোস্ট</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-notif', this)">📢 নোটিশ</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-pending', this)">🔔 আবেদন (<span id="pCount">0</span>)</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchTab('tab-feed', this)">💬 মতামত</a></li>
+        </ul>
+
+        <div class="tab-content px-3">
+            <!-- 1. HOME -->
+            <div id="tab-home" class="tab-pane d-block">
+                <!-- VISITOR COUNTER -->
+                <div class="card bg-success text-white mb-3 text-center p-3">
+                    <h3>মোট ভিজিটর: <span id="visitorCount">0</span></h3>
+                </div>
+
+                <div class="row g-3">
+                    <!-- SITE SETTINGS & MARQUEE -->
+                    <div class="col-md-6">
+                        <div class="card p-3 h-100 shadow-sm">
+                            <h6 class="fw-bold text-primary border-bottom pb-2">সেটিংস</h6>
+
+                            <!-- Logo -->
+                            <label class="small fw-bold text-muted">লোগো:</label>
+                            <div class="input-group mb-2">
+                                <input type="file" id="logoFile" class="form-control">
+                                <button class="btn btn-primary" onclick="upSaveLogo()">সেভ</button>
+                            </div>
+
+                            <!-- RUNNING TEXT / MARQUEE SETTING -->
+                            <label class="small fw-bold text-danger">চলমান নোটিশ (Headline):</label>
+                            <div class="input-group mb-2">
+                                <input type="text" id="newsInput" class="form-control" placeholder="এখানে ব্রেকিং নিউজ লিখুন...">
+                                <button class="btn btn-warning" onclick="saveHead()">আপডেট</button>
+                            </div>
+
+                            <!-- Footer/About -->
+                            <label class="small fw-bold text-muted">ফুটার / সম্পর্কে:</label>
+                            <div class="input-group">
+                                <textarea id="aboutInput" class="form-control" rows="1"></textarea>
+                                <button class="btn btn-dark" onclick="saveAbout()">আপডেট</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SLIDER -->
+                    <div class="col-md-6"><div class="card p-3 h-100 shadow-sm border-primary"><h6 class="fw-bold text-primary border-bottom pb-2">স্লাইডার ছবি</h6><div class="input-group mb-2"><input type="file" id="sliderFile" class="form-control"><button class="btn btn-primary" onclick="addSlider()">যুক্ত করুন</button></div><div id="sliderList" class="bg-light p-2 rounded border" style="min-height: 100px;"></div></div></div>
+
+                    <!-- Categories -->
+                    <div class="col-12">
+                        <div class="card p-3 shadow-sm border-success">
+                            <h6 class="fw-bold text-success border-bottom pb-2">ক্যাটাগরি</h6>
+                            <input type="hidden" id="catEditId">
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-5"><input type="file" id="catFile" class="form-control"></div>
+                                <div class="col-md-5"><input type="text" id="catName" class="form-control" placeholder="নাম"></div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-success w-100" id="btnCatSave" onclick="saveCat()">তৈরি করুন</button>
+                                    <button class="btn btn-secondary w-100 mt-1" id="btnCatCancel" style="display:none" onclick="resetCat()">বাতিল</button>
+                                </div>
+                            </div>
+                            <div class="border rounded bg-light" style="max-height: 300px; overflow-y: auto; padding:10px;" id="catList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. MENU -->
+            <div id="tab-menu" class="tab-pane d-none">
+                <div class="row g-3">
+                    <!-- Main Menu -->
+                    <div class="col-md-6">
+                        <div class="card p-3 h-100 shadow-sm">
+                            <h6 class="fw-bold border-bottom pb-2">প্রধান মেনু</h6>
+                            <input type="hidden" id="menuEditId">
+                            <input type="file" id="mIcon" class="form-control mb-1">
+                            <div class="input-group mb-2">
+                                <input type="text" id="mTitle" class="form-control" placeholder="মেনুর নাম">
+                                <button class="btn btn-dark" id="btnMenuSave" onclick="saveMenu()">Add</button>
+                                <button class="btn btn-secondary" id="btnMenuCancel" style="display:none" onclick="resetMenu()">X</button>
+                            </div>
+                            <ul id="mList" class="list-group"></ul>
+                        </div>
+                    </div>
+                    <!-- Sub Menu -->
+                    <div class="col-md-6">
+                        <div class="card p-3 h-100 shadow-sm">
+                            <h6 class="fw-bold border-bottom pb-2">সাব-মেনু</h6>
+                            <label class="small text-danger">আগে মেইন মেনু সিলেক্ট করুন:</label>
+                            <select id="pMenu" class="form-select mb-2" onchange="renderSubMenus()"></select>
+
+                            <input type="hidden" id="subEditId">
+                            <div class="input-group mb-3">
+                                <input type="text" id="sTitle" class="form-control" placeholder="সাব-মেনুর নাম">
+                                <button class="btn btn-success" id="btnSubSave" onclick="saveSub()">Add</button>
+                                <button class="btn btn-secondary" id="btnSubCancel" style="display:none" onclick="resetSub()">X</button>
+                            </div>
+
+                            <h6 class="small fw-bold text-muted">লিস্ট:</h6>
+                            <ul id="subList" class="list-group">
+                                <li class="list-group-item text-center text-muted small">মেনু সিলেক্ট করুন...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. POSTS -->
+            <div id="tab-post" class="tab-pane d-none"><div class="row g-3"><div class="col-md-4"><div class="card p-3 shadow border-success position-sticky" style="top: 10px;"><h5 id="formTitle">নতুন পোস্ট</h5><input type="hidden" id="editId"><label class="fw-bold text-danger">জায়গা:</label><select id="pDest" class="form-select mb-2 border-danger"><option>লোড হচ্ছে...</option></select><input type="file" id="pFile" class="form-control mb-2"><div id="imgPreview" style="display:none"><img src="" height="50"></div><input type="text" id="pTitle" class="form-control mb-2" placeholder="Title"><input type="text" id="pPhone" class="form-control mb-2" placeholder="Phone"><textarea id="pDesc" class="form-control mb-2" rows="4"></textarea><button class="btn btn-success w-100" id="btnSubmit" onclick="subPost()">সাবমিট</button><button class="btn btn-secondary w-100 mt-2" id="btnCancel" style="display:none" onclick="resPost()">বাতিল</button></div></div><div class="col-md-8"><div class="card p-3 shadow-sm"><h5>পোস্ট তালিকা</h5><div class="table-container"><table class="table table-bordered text-center"><thead class="table-dark"><tr><th>ছবি</th><th>নাম</th><th>লোকেশন</th><th>অ্যাকশন</th></tr></thead><tbody id="pList"></tbody></table></div></div></div></div></div>
+            <!-- 4. NOTIFICATION -->
+            <div id="tab-notif" class="tab-pane d-none"><div class="row"><div class="col-md-6 offset-md-3"><div class="card p-3 border-danger"><h5>নোটিশ পাঠান</h5><input type="text" id="notifTitle" class="form-control mb-2"><textarea id="notifBody" class="form-control mb-2"></textarea><button class="btn btn-danger w-100" onclick="sendNotif()">পাঠান</button></div><ul id="oldNotif" class="list-group mt-3"></ul></div></div></div>
+            <!-- 5. PENDING -->
+            <div id="tab-pending" class="tab-pane d-none"><div class="card p-3 border-warning"><h5>আবেদন</h5><div id="pendList" class="row g-3"></div></div></div>
+            <!-- 6. FEEDBACK -->
+            <div id="tab-feed" class="tab-pane d-none"><div class="card p-3 border-info"><h5>মতামত</h5><div id="feedList" class="list-group"></div></div></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        const API="0e75c16cdb6ffd2bd5249dd1f69783e8",CFG={apiKey:"AIzaSyApSYWGXEoK4g78O0dFatQ4mFqBTx8GXq4",authDomain:"nor-tec.firebaseapp.com",databaseURL:"https://nor-tec-default-rtdb.firebaseio.com",projectId:"nor-tec",storageBucket:"nor-tec.firebasestorage.app",messagingSenderId:"82087926688",appId:"1:82087926688:web:b2343cdab11440809862c5"};firebase.initializeApp(CFG);const db=firebase.database();
+
+        function switchTab(id,el){['tab-home','tab-menu','tab-post','tab-notif','tab-pending','tab-feed'].forEach(t=>document.getElementById(t).className='tab-pane d-none');document.getElementById(id).className='tab-pane d-block fade show';document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));el.classList.add('active');}
+        function load(s){document.getElementById('loadingOverlay').style.display=s?'flex':'none'}
+        async function upImg(fid){const f=document.getElementById(fid);if(f.files.length==0)return null;const d=new FormData();d.append("image",f.files[0]);try{const r=await fetch(`https://api.imgbb.com/1/upload?key=${API}`,{method:"POST",body:d});const j=await r.json();return j.success?j.data.url:null}catch(e){return null}}
+
+        // Visitor Count
+        db.ref('siteStats/visitCount').on('value', s => {
+            document.getElementById('visitorCount').innerText = (s.val() || 0).toString().replace(/\d/g, d=>"০১২৩৪৫৬৭৮৯"[d]);
+        });
+
+        // ================= GENERAL INFO & MARQUEE =================
+        async function upSaveLogo(){load(1);const u=await upImg('logoFile');if(u)db.ref('siteSettings/logo').set(u);load(0)}
+
+        // Save Marquee/Headline
+        function saveHead(){
+            const t = document.getElementById('newsInput').value;
+            db.ref('headline').set(t);
+            alert('চলমান নোটিশ আপডেট হয়েছে!');
+        }
+        // Load existing Marquee
+        db.ref('headline').on('value',s=>{ if(s.val()) document.getElementById('newsInput').value = s.val() });
+
+        function saveAbout(){db.ref('siteSettings/aboutText').set(document.getElementById('aboutInput').value);alert('Ok')}
+        db.ref('siteSettings/aboutText').on('value',s=>{if(s.val())document.getElementById('aboutInput').value=s.val()});
+
+        // Slider Logic
+        async function addSlider(){if(document.getElementById('sliderFile').files.length==0)return;load(1);const u=await upImg('sliderFile');if(u)db.ref('slider').push({url:u});document.getElementById('sliderFile').value='';load(0)}
+        db.ref('slider').on('value',s=>{const l=document.getElementById('sliderList');l.innerHTML='';if(s.exists())s.forEach(c=>{l.innerHTML+=`<div class="slider-thumb"><img src="${c.val().url}"><button class="btn-del" onclick="db.ref('slider/${c.key}').remove()">X</button></div>`})});
+
+        // ================= CATEGORY LOGIC (Edit/Delete) =================
+        let cats={};
+        db.ref('categories').on('value', s => {
+            cats = s.val() || {};
+            const l = document.getElementById('catList');
+            l.innerHTML = '';
+            s.forEach(c => {
+                l.innerHTML += `
+                <div class="cat-thumb">
+                    <img src="${c.val().icon}">
+                    <span>${c.val().name}</span>
+                    <div class="btn-action-group">
+                        <button class="btn btn-warning btn-mini text-white" onclick="editCat('${c.key}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-mini" onclick="if(confirm('Delete?')) db.ref('categories/${c.key}').remove()"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            });
+            renderDest();
+        });
+
+        function editCat(key) {
+            const c = cats[key];
+            document.getElementById('catName').value = c.name;
+            document.getElementById('catEditId').value = key;
+            document.getElementById('btnCatSave').innerText = 'আপডেট করুন';
+            document.getElementById('btnCatCancel').style.display = 'block';
+        }
+
+        async function saveCat() {
+            const n = document.getElementById('catName').value;
+            const id = document.getElementById('catEditId').value;
+            if(!n) return alert('নাম দিন');
+            load(1);
+
+            let u = await upImg('catFile');
+            if(!u && id && cats[id]) u = cats[id].icon;
+
+            const data = { name: n };
+            if(u) data.icon = u;
+
+            if(id) {
+                db.ref('categories/' + id).update(data);
+            } else {
+                if(!u) { alert('ছবি দিন'); load(0); return; }
+                db.ref('categories').push(data);
+            }
+            resetCat();
+            load(0);
+        }
+
+        function resetCat() {
+            document.getElementById('catName').value = '';
+            document.getElementById('catFile').value = '';
+            document.getElementById('catEditId').value = '';
+            document.getElementById('btnCatSave').innerText = 'তৈরি করুন';
+            document.getElementById('btnCatCancel').style.display = 'none';
+        }
+
+        // ================= MENU LOGIC (Edit/Delete) =================
+        let mens={};
+        db.ref('sideMenu').on('value', s => {
+            mens = s.val() || {};
+            const l = document.getElementById('mList');
+            const p = document.getElementById('pMenu');
+            const oldSel = p.value;
+
+            l.innerHTML = '';
+            p.innerHTML = '<option value="">Select Parent</option>';
+
+            s.forEach(c => {
+                l.innerHTML += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>${c.val().icon ? `<img src="${c.val().icon}" width="20">` : ''} ${c.val().title}</div>
+                    <div>
+                        <button class="btn btn-warning btn-sm me-1" onclick="editMenu('${c.key}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete?')) db.ref('sideMenu/${c.key}').remove()"><i class="fas fa-trash"></i></button>
+                    </div>
+                </li>`;
+                p.innerHTML += `<option value="${c.key}">${c.val().title}</option>`;
+            });
+            p.value = oldSel;
+            renderSubMenus();
+            renderDest();
+        });
+
+        function editMenu(key) {
+            const m = mens[key];
+            document.getElementById('mTitle').value = m.title;
+            document.getElementById('menuEditId').value = key;
+            document.getElementById('btnMenuSave').innerText = 'Update';
+            document.getElementById('btnMenuCancel').style.display = 'block';
+        }
+
+        async function saveMenu() {
+            const t = document.getElementById('mTitle').value;
+            const id = document.getElementById('menuEditId').value;
+            if(!t) return;
+            load(1);
+
+            let u = await upImg('mIcon');
+            if(!u && id && mens[id]) u = mens[id].icon;
+
+            const data = { title: t };
+            if(u) data.icon = u;
+
+            if(id) db.ref('sideMenu/' + id).update(data);
+            else db.ref('sideMenu').push(data);
+
+            resetMenu();
+            load(0);
+        }
+
+        function resetMenu() {
+            document.getElementById('mTitle').value = '';
+            document.getElementById('mIcon').value = '';
+            document.getElementById('menuEditId').value = '';
+            document.getElementById('btnMenuSave').innerText = 'Add';
+            document.getElementById('btnMenuCancel').style.display = 'none';
+        }
+
+        // ================= SUB-MENU LOGIC (Edit/Delete) =================
+        function renderSubMenus() {
+            const pid = document.getElementById('pMenu').value;
+            const l = document.getElementById('subList');
+            l.innerHTML = '';
+
+            if(!pid || !mens[pid] || !mens[pid].submenus) {
+                l.innerHTML = '<li class="list-group-item text-center text-muted small">সাব-মেনু নেই বা প্যারেন্ট সিলেক্ট করা হয়নি</li>';
+                return;
+            }
+
+            Object.entries(mens[pid].submenus).forEach(([k, v]) => {
+                l.innerHTML += `
+                <li class="list-group-item d-flex justify-content-between">
+                    ${v.name}
+                    <div>
+                        <button class="btn btn-warning btn-sm me-1" onclick="editSub('${pid}', '${k}', '${v.name}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete?')) db.ref('sideMenu/${pid}/submenus/${k}').remove()"><i class="fas fa-trash"></i></button>
+                    </div>
+                </li>`;
+            });
+        }
+
+        function editSub(pid, subId, name) {
+            document.getElementById('pMenu').value = pid;
+            document.getElementById('sTitle').value = name;
+            document.getElementById('subEditId').value = subId;
+            document.getElementById('btnSubSave').innerText = 'Update';
+            document.getElementById('btnSubCancel').style.display = 'block';
+        }
+
+        function saveSub() {
+            const pid = document.getElementById('pMenu').value;
+            const t = document.getElementById('sTitle').value;
+            const sid = document.getElementById('subEditId').value;
+
+            if(!pid) return alert('প্যারেন্ট মেনু সিলেক্ট করুন');
+            if(!t) return alert('নাম দিন');
+
+            if(sid) {
+                db.ref(`sideMenu/${pid}/submenus/${sid}`).update({name: t});
+            } else {
+                db.ref(`sideMenu/${pid}/submenus`).push({name: t});
+            }
+            resetSub();
+        }
+
+        function resetSub() {
+            document.getElementById('sTitle').value = '';
+            document.getElementById('subEditId').value = '';
+            document.getElementById('btnSubSave').innerText = 'Add';
+            document.getElementById('btnSubCancel').style.display = 'none';
+        }
+
+        // ================= POSTS & OTHER LOGIC =================
+        let allP={};
+        function renderDest(){const s=document.getElementById('pDest');const old=s.value;s.innerHTML='<option value="">-- Select --</option>';if(Object.keys(cats).length){s.innerHTML+=`<optgroup label="Home">`;Object.entries(cats).forEach(([k,v])=>s.innerHTML+=`<option value="${k}">${v.name}</option>`);s.innerHTML+=`</optgroup>`}if(Object.keys(mens).length){s.innerHTML+=`<optgroup label="Menu">`;Object.entries(mens).forEach(([k,v])=>{s.innerHTML+=`<option value="${k}" style="font-weight:bold">⚫ ${v.title}</option>`;if(v.submenus)Object.entries(v.submenus).forEach(([sk,sv])=>s.innerHTML+=`<option value="${sk}">&nbsp;&nbsp;↳ ${sv.name}</option>`);});s.innerHTML+=`</optgroup>`}if(old)s.value=old}
+        function getLoc(id){if(cats[id])return`Cat: ${cats[id].name}`;if(mens[id])return`Menu: ${mens[id].title}`;for(let k in mens)if(mens[k].submenus&&mens[k].submenus[id])return`${mens[k].title} > ${mens[k].submenus[id].name}`;return'Unknown'}
+        db.ref('posts').on('value',s=>{allP=s.val()||{};const t=document.getElementById('pList');t.innerHTML='';if(!s.exists()){t.innerHTML='<tr><td colspan="4">No Data</td></tr>';return}Object.entries(allP).reverse().forEach(([k,v])=>{t.innerHTML+=`<tr><td>${v.image?`<img src="${v.image}" class="post-img-thumb">`:'-'}</td><td>${v.title}</td><td>${getLoc(v.parentId)}</td><td><button class="btn btn-primary btn-sm me-1" onclick="editP('${k}')">Edit</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Del?'))db.ref('posts/${k}').remove()">Del</button></td></tr>`})});
+        async function subPost(){const d=document.getElementById('pDest').value,t=document.getElementById('pTitle').value,id=document.getElementById('editId').value;if(!d||!t)return alert('Required');load(1);let u="";if(document.getElementById('pFile').files.length>0)u=await upImg('pFile');else if(id&&allP[id].image)u=allP[id].image;const data={parentId:d,title:t,image:u,contact:document.getElementById('pPhone').value,details:document.getElementById('pDesc').value,timestamp:Date.now()};if(id)db.ref('posts/'+id).update(data);else db.ref('posts').push(data);resPost();load(0)}
+        function editP(k){const p=allP[k];document.getElementById('editId').value=k;document.getElementById('formTitle').innerText='Edit';document.getElementById('btnSubmit').innerText='Update';document.getElementById('btnCancel').style.display='block';document.getElementById('pDest').value=p.parentId;document.getElementById('pTitle').value=p.title;document.getElementById('pPhone').value=p.contact;document.getElementById('pDesc').value=p.details;if(p.image){document.getElementById('imgPreview').style.display='block';document.querySelector('#imgPreview img').src=p.image}}
+        function resPost(){document.getElementById('editId').value='';document.getElementById('formTitle').innerText='New Post';document.getElementById('btnSubmit').innerText='Submit';document.getElementById('btnCancel').style.display='none';document.getElementById('imgPreview').style.display='none';document.getElementById('pTitle').value='';document.getElementById('pPhone').value='';document.getElementById('pDesc').value='';document.getElementById('pFile').value=''}
+        function sendNotif(){const t=document.getElementById('notifTitle').value,b=document.getElementById('notifBody').value;if(t){db.ref('notifications').push({title:t,body:b,time:Date.now()});alert('Sent');document.getElementById('notifTitle').value=''}}
+        db.ref('notifications').limitToLast(5).on('value',s=>{let h='';if(s.exists())Object.values(s.val()).reverse().forEach(n=>h+=`<li class="list-group-item"><b>${n.title}</b><br><small>${n.body}</small></li>`);document.getElementById('oldNotif').innerHTML=h});
+        db.ref('pending_posts').on('value',s=>{const l=document.getElementById('pendList');document.getElementById('pCount').innerText=s.numChildren();l.innerHTML='';if(!s.exists())return;s.forEach(c=>{const p=c.val();l.innerHTML+=`<div class="col-md-4"><div class="card border-warning"><div class="card-body"><h5>${p.title}</h5><button class="btn btn-success w-100" onclick="appP('${c.key}')">Approve</button><button class="btn btn-danger w-100 mt-1" onclick="db.ref('pending_posts/${c.key}').remove()">Del</button></div></div></div>`})});
+        function appP(k){db.ref('pending_posts/'+k).once('value',s=>{if(s.exists()){db.ref('posts').push(s.val());db.ref('pending_posts/'+k).remove()}})}
+        db.ref('feedbacks').on('value',s=>{const l=document.getElementById('feedList');l.innerHTML='';if(!s.exists())return;s.forEach(c=>{const f=c.val();l.innerHTML+=`<div class="list-group-item"><b>${f.name}</b>: ${f.message} <button class="btn-del position-relative float-end" onclick="db.ref('feedbacks/${c.key}').remove()">X</button></div>`})});
+    </script>
+</body>
+</html>
