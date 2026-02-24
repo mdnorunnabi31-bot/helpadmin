@@ -97,6 +97,11 @@
         .login-box .btn-login:hover { background: #537d82; }
         .login-box .footer-links { margin-top: 20px; color: #000; font-size: 13px; font-weight: bold; }
         .login-box .footer-links a { color: #000; text-decoration: none; font-weight: bold; }
+
+        /* --- আপডেট করা কার্ড ডিজাইন --- */
+        .feedback-card, .pending-card { background: #fff; border-radius: 12px; border-left: 5px solid #198754; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .card-header-custom { background: #fdfdfd; border-bottom: 1px solid #eee; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .preview-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -141,32 +146,24 @@
             <div class="tab-content px-3">
                 <!-- 1. HOME -->
                 <div id="tab-home" class="tab-pane d-block">
-                    <!-- VISITOR COUNTER -->
                     <div class="card bg-success text-white mb-3 text-center p-3">
                         <h3>মোট ভিজিটর: <span id="visitorCount">0</span></h3>
                     </div>
 
                     <div class="row g-3">
-                        <!-- SITE SETTINGS & MARQUEE -->
                         <div class="col-md-6">
                             <div class="card p-3 h-100 shadow-sm">
                                 <h6 class="fw-bold text-primary border-bottom pb-2">সেটিংস</h6>
-
-                                <!-- Logo -->
                                 <label class="small fw-bold text-muted">লোগো:</label>
                                 <div class="input-group mb-2">
                                     <input type="file" id="logoFile" class="form-control">
                                     <button class="btn btn-primary" onclick="upSaveLogo()">সেভ</button>
                                 </div>
-
-                                <!-- RUNNING TEXT / MARQUEE SETTING -->
                                 <label class="small fw-bold text-danger">চলমান নোটিশ (Headline):</label>
                                 <div class="input-group mb-2">
                                     <input type="text" id="newsInput" class="form-control" placeholder="এখানে ব্রেকিং নিউজ লিখুন...">
                                     <button class="btn btn-warning" onclick="saveHead()">আপডেট</button>
                                 </div>
-
-                                <!-- Footer/About -->
                                 <label class="small fw-bold text-muted">ফুটার / সম্পর্কে:</label>
                                 <div class="input-group">
                                     <textarea id="aboutInput" class="form-control" rows="1"></textarea>
@@ -175,10 +172,8 @@
                             </div>
                         </div>
 
-                        <!-- SLIDER -->
                         <div class="col-md-6"><div class="card p-3 h-100 shadow-sm border-primary"><h6 class="fw-bold text-primary border-bottom pb-2">স্লাইডার ছবি</h6><div class="input-group mb-2"><input type="file" id="sliderFile" class="form-control"><button class="btn btn-primary" onclick="addSlider()">যুক্ত করুন</button></div><div id="sliderList" class="bg-light p-2 rounded border" style="min-height: 100px;"></div></div></div>
 
-                        <!-- Categories -->
                         <div class="col-12">
                             <div class="card p-3 shadow-sm border-success">
                                 <h6 class="fw-bold text-success border-bottom pb-2">ক্যাটাগরি</h6>
@@ -200,7 +195,6 @@
                 <!-- 2. MENU -->
                 <div id="tab-menu" class="tab-pane d-none">
                     <div class="row g-3">
-                        <!-- Main Menu -->
                         <div class="col-md-6">
                             <div class="card p-3 h-100 shadow-sm">
                                 <h6 class="fw-bold border-bottom pb-2">প্রধান মেনু</h6>
@@ -214,24 +208,19 @@
                                 <ul id="mList" class="list-group"></ul>
                             </div>
                         </div>
-                        <!-- Sub Menu -->
                         <div class="col-md-6">
                             <div class="card p-3 h-100 shadow-sm">
                                 <h6 class="fw-bold border-bottom pb-2">সাব-মেনু</h6>
                                 <label class="small text-danger">আগে মেইন মেনু সিলেক্ট করুন:</label>
                                 <select id="pMenu" class="form-select mb-2" onchange="renderSubMenus()"></select>
-
                                 <input type="hidden" id="subEditId">
                                 <div class="input-group mb-3">
                                     <input type="text" id="sTitle" class="form-control" placeholder="সাব-মেনুর নাম">
                                     <button class="btn btn-success" id="btnSubSave" onclick="saveSub()">Add</button>
                                     <button class="btn btn-secondary" id="btnSubCancel" style="display:none" onclick="resetSub()">X</button>
                                 </div>
-
                                 <h6 class="small fw-bold text-muted">লিস্ট:</h6>
-                                <ul id="subList" class="list-group">
-                                    <li class="list-group-item text-center text-muted small">মেনু সিলেক্ট করুন...</li>
-                                </ul>
+                                <ul id="subList" class="list-group"></ul>
                             </div>
                         </div>
                     </div>
@@ -240,7 +229,7 @@
                 <!-- 3. POSTS -->
                 <div id="tab-post" class="tab-pane d-none"><div class="row g-3"><div class="col-md-4"><div class="card p-3 shadow border-success position-sticky" style="top: 10px;"><h5 id="formTitle">নতুন পোস্ট</h5><input type="hidden" id="editId"><label class="fw-bold text-danger">জায়গা:</label><select id="pDest" class="form-select mb-2 border-danger"><option>লোড হচ্ছে...</option></select><input type="file" id="pFile" class="form-control mb-2"><div id="imgPreview" style="display:none"><img src="" height="50"></div><input type="text" id="pTitle" class="form-control mb-2" placeholder="Title"><input type="text" id="pPhone" class="form-control mb-2" placeholder="Phone"><textarea id="pDesc" class="form-control mb-2" rows="4"></textarea><button class="btn btn-success w-100" id="btnSubmit" onclick="subPost()">সাবমিট</button><button class="btn btn-secondary w-100 mt-2" id="btnCancel" style="display:none" onclick="resPost()">বাতিল</button></div></div><div class="col-md-8"><div class="card p-3 shadow-sm"><h5>পোস্ট তালিকা</h5><div class="table-container"><table class="table table-bordered text-center"><thead class="table-dark"><tr><th>ছবি</th><th>নাম</th><th>লোকেশন</th><th>অ্যাকশন</th></tr></thead><tbody id="pList"></tbody></table></div></div></div></div></div>
                 
-                <!-- 4. NOTIFICATION (এডিট ও ডিলিটসহ আপডেট করা হয়েছে) -->
+                <!-- 4. NOTIFICATION -->
                 <div id="tab-notif" class="tab-pane d-none">
                     <div class="row">
                         <div class="col-md-6 offset-md-3">
@@ -258,23 +247,51 @@
                     </div>
                 </div>
 
-                <!-- 5. PENDING -->
-                <div id="tab-pending" class="tab-pane d-none"><div class="card p-3 border-warning"><h5>আবেদন</h5><div id="pendList" class="row g-3"></div></div></div>
-                <!-- 6. FEEDBACK -->
-                <div id="tab-feed" class="tab-pane d-none"><div class="card p-3 border-info"><h5>মতামত</h5><div id="feedList" class="list-group"></div></div></div>
+                <!-- 5. PENDING (DETAILED UPDATE) -->
+                <div id="tab-pending" class="tab-pane d-none">
+                    <div class="card p-3 border-warning">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="m-0"><i class="fas fa-clock me-2"></i> পেন্ডিং আবেদনসমূহ</h5>
+                        </div>
+                        <div id="pendList" class="row g-3">
+                            <div class="col-12 text-center py-5 text-muted">লোড হচ্ছে...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. FEEDBACK (DETAILED UPDATE) -->
+                <div id="tab-feed" class="tab-pane d-none">
+                    <div class="card p-3 border-info">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="m-0 text-info"><i class="fas fa-comment-dots me-2"></i> ইউজার মতামত</h5>
+                        </div>
+                        <div id="feedList" class="row g-3">
+                            <div class="col-12 text-center py-5 text-muted">লোড হচ্ছে...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
+    <!-- Firebase Scripts (NO MINIFICATION) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script>
-        const API="0e75c16cdb6ffd2bd5249dd1f69783e8",CFG={apiKey:"AIzaSyApSYWGXEoK4g78O0dFatQ4mFqBTx8GXq4",authDomain:"nor-tec.firebaseapp.com",databaseURL:"https://nor-tec-default-rtdb.firebaseio.com",projectId:"nor-tec",storageBucket:"nor-tec.firebasestorage.app",messagingSenderId:"82087926688",appId:"1:82087926688:web:b2343cdab11440809862c5"};
+        const API = "0e75c16cdb6ffd2bd5249dd1f69783e8";
+        const CFG = {
+            apiKey: "AIzaSyApSYWGXEoK4g78O0dFatQ4mFqBTx8GXq4",
+            authDomain: "nor-tec.firebaseapp.com",
+            databaseURL: "https://nor-tec-default-rtdb.firebaseio.com",
+            projectId: "nor-tec",
+            storageBucket: "nor-tec.firebasestorage.app",
+            messagingSenderId: "82087926688",
+            appId: "1:82087926688:web:b2343cdab11440809862c5"
+        };
         firebase.initializeApp(CFG);
-        const db=firebase.database();
-        const auth=firebase.auth();
+        const db = firebase.database();
+        const auth = firebase.auth();
 
         // --- Firebase Auth Logic ---
         function loginAdmin() {
@@ -298,35 +315,83 @@
             }
         });
 
-        // --- মূল ফাংশনসমূহ (আপনার দেওয়া কোড হুবহু রাখা হয়েছে) ---
-        function switchTab(id,el){['tab-home','tab-menu','tab-post','tab-notif','tab-pending','tab-feed'].forEach(t=>document.getElementById(t).className='tab-pane d-none');document.getElementById(id).className='tab-pane d-block fade show';document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));el.classList.add('active');}
-        function load(s){document.getElementById('loadingOverlay').style.display=s?'flex':'none'}
-        async function upImg(fid){const f=document.getElementById(fid);if(f.files.length==0)return null;const d=new FormData();d.append("image",f.files[0]);try{const r=await fetch(`https://api.imgbb.com/1/upload?key=${API}`,{method:"POST",body:d});const j=await r.json();return j.success?j.data.url:null}catch(e){return null}}
+        // --- Switch Tabs ---
+        function switchTab(id, el) {
+            const tabs = ['tab-home', 'tab-menu', 'tab-post', 'tab-notif', 'tab-pending', 'tab-feed'];
+            tabs.forEach(t => document.getElementById(t).className = 'tab-pane d-none');
+            document.getElementById(id).className = 'tab-pane d-block fade show';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function load(s) {
+            document.getElementById('loadingOverlay').style.display = s ? 'flex' : 'none';
+        }
+
+        async function upImg(fid) {
+            const f = document.getElementById(fid);
+            if(f.files.length == 0) return null;
+            const d = new FormData();
+            d.append("image", f.files[0]);
+            try {
+                const r = await fetch(`https://api.imgbb.com/1/upload?key=${API}`, {
+                    method: "POST",
+                    body: d
+                });
+                const j = await r.json();
+                return j.success ? j.data.url : null;
+            } catch(e) {
+                return null;
+            }
+        }
 
         // Visitor Count
         db.ref('siteStats/visitCount').on('value', s => {
-            document.getElementById('visitorCount').innerText = (s.val() || 0).toString().replace(/\d/g, d=>"০১২৩৪৫৬৭৮৯"[d]);
+            document.getElementById('visitorCount').innerText = (s.val() || 0).toString().replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
         });
 
-        // ================= GENERAL INFO & MARQUEE =================
-        async function upSaveLogo(){load(1);const u=await upImg('logoFile');if(u)db.ref('siteSettings/logo').set(u);load(0)}
+        // ================= GENERAL SETTINGS =================
+        async function upSaveLogo() {
+            load(1);
+            const u = await upImg('logoFile');
+            if(u) db.ref('siteSettings/logo').set(u);
+            load(0);
+        }
 
-        function saveHead(){
+        function saveHead() {
             const t = document.getElementById('newsInput').value;
             db.ref('headline').set(t);
             alert('চলমান নোটিশ আপডেট হয়েছে!');
         }
-        db.ref('headline').on('value',s=>{ if(s.val()) document.getElementById('newsInput').value = s.val() });
+        db.ref('headline').on('value', s => { if(s.val()) document.getElementById('newsInput').value = s.val() });
 
-        function saveAbout(){db.ref('siteSettings/aboutText').set(document.getElementById('aboutInput').value);alert('Ok')}
-        db.ref('siteSettings/aboutText').on('value',s=>{if(s.val())document.getElementById('aboutInput').value=s.val()});
+        function saveAbout() {
+            db.ref('siteSettings/aboutText').set(document.getElementById('aboutInput').value);
+            alert('সফল হয়েছে');
+        }
+        db.ref('siteSettings/aboutText').on('value', s => { if(s.val()) document.getElementById('aboutInput').value = s.val() });
 
-        // Slider Logic
-        async function addSlider(){if(document.getElementById('sliderFile').files.length==0)return;load(1);const u=await upImg('sliderFile');if(u)db.ref('slider').push({url:u});document.getElementById('sliderFile').value='';load(0)}
-        db.ref('slider').on('value',s=>{const l=document.getElementById('sliderList');l.innerHTML='';if(s.exists())s.forEach(c=>{l.innerHTML+=`<div class="slider-thumb"><img src="${c.val().url}"><button class="btn-del" onclick="db.ref('slider/${c.key}').remove()">X</button></div>`})});
+        // Slider
+        async function addSlider() {
+            if(document.getElementById('sliderFile').files.length == 0) return;
+            load(1);
+            const u = await upImg('sliderFile');
+            if(u) db.ref('slider').push({ url: u });
+            document.getElementById('sliderFile').value = '';
+            load(0);
+        }
+        db.ref('slider').on('value', s => {
+            const l = document.getElementById('sliderList');
+            l.innerHTML = '';
+            if(s.exists()) {
+                s.forEach(c => {
+                    l.innerHTML += `<div class="slider-thumb"><img src="${c.val().url}"><button class="btn-del" onclick="db.ref('slider/${c.key}').remove()">X</button></div>`;
+                });
+            }
+        });
 
-        // ================= CATEGORY LOGIC =================
-        let cats={};
+        // ================= CATEGORY =================
+        let cats = {};
         db.ref('categories').on('value', s => {
             cats = s.val() || {};
             const l = document.getElementById('catList');
@@ -362,12 +427,8 @@
             if(!u && id && cats[id]) u = cats[id].icon;
             const data = { name: n };
             if(u) data.icon = u;
-            if(id) {
-                db.ref('categories/' + id).update(data);
-            } else {
-                if(!u) { alert('ছবি দিন'); load(0); return; }
-                db.ref('categories').push(data);
-            }
+            if(id) db.ref('categories/' + id).update(data);
+            else { if(!u) { alert('ছবি দিন'); load(0); return; } db.ref('categories').push(data); }
             resetCat();
             load(0);
         }
@@ -380,8 +441,8 @@
             document.getElementById('btnCatCancel').style.display = 'none';
         }
 
-        // ================= MENU LOGIC =================
-        let mens={};
+        // ================= SIDE MENU =================
+        let mens = {};
         db.ref('sideMenu').on('value', s => {
             mens = s.val() || {};
             const l = document.getElementById('mList');
@@ -436,7 +497,7 @@
             document.getElementById('btnMenuCancel').style.display = 'none';
         }
 
-        // ================= SUB-MENU LOGIC =================
+        // Submenus
         function renderSubMenus() {
             const pid = document.getElementById('pMenu').value;
             const l = document.getElementById('subList');
@@ -470,11 +531,8 @@
             const t = document.getElementById('sTitle').value;
             const sid = document.getElementById('subEditId').value;
             if(!pid || !t) return;
-            if(sid) {
-                db.ref(`sideMenu/${pid}/submenus/${sid}`).update({name: t});
-            } else {
-                db.ref(`sideMenu/${pid}/submenus`).push({name: t});
-            }
+            if(sid) db.ref(`sideMenu/${pid}/submenus/${sid}`).update({ name: t });
+            else db.ref(`sideMenu/${pid}/submenus`).push({ name: t });
             resetSub();
         }
 
@@ -485,27 +543,96 @@
             document.getElementById('btnSubCancel').style.display = 'none';
         }
 
-        // ================= POSTS LOGIC =================
-        let allP={};
-        function renderDest(){const s=document.getElementById('pDest');const old=s.value;s.innerHTML='<option value="">-- Select --</option>';if(Object.keys(cats).length){s.innerHTML+=`<optgroup label="Home">`;Object.entries(cats).forEach(([k,v])=>s.innerHTML+=`<option value="${k}">${v.name}</option>`);s.innerHTML+=`</optgroup>`}if(Object.keys(mens).length){s.innerHTML+=`<optgroup label="Menu">`;Object.entries(mens).forEach(([k,v])=>{s.innerHTML+=`<option value="${k}" style="font-weight:bold">⚫ ${v.title}</option>`;if(v.submenus)Object.entries(v.submenus).forEach(([sk,sv])=>s.innerHTML+=`<option value="${sk}">&nbsp;&nbsp;↳ ${sv.name}</option>`);});s.innerHTML+=`</optgroup>`}if(old)s.value=old}
-        function getLoc(id){if(cats[id])return`Cat: ${cats[id].name}`;if(mens[id])return`Menu: ${mens[id].title}`;for(let k in mens)if(mens[k].submenus&&mens[k].submenus[id])return`${mens[k].title} > ${mens[k].submenus[id].name}`;return'Unknown'}
-        db.ref('posts').on('value',s=>{allP=s.val()||{};const t=document.getElementById('pList');t.innerHTML='';if(!s.exists()){t.innerHTML='<tr><td colspan="4">No Data</td></tr>';return}Object.entries(allP).reverse().forEach(([k,v])=>{t.innerHTML+=`<tr><td>${v.image?`<img src="${v.image}" class="post-img-thumb">`:'-'}</td><td>${v.title}</td><td>${getLoc(v.parentId)}</td><td><button class="btn btn-primary btn-sm me-1" onclick="editP('${k}')">Edit</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Del?'))db.ref('posts/${k}').remove()">Del</button></td></tr>`})});
-        async function subPost(){const d=document.getElementById('pDest').value,t=document.getElementById('pTitle').value,id=document.getElementById('editId').value;if(!d||!t)return alert('Required');load(1);let u="";if(document.getElementById('pFile').files.length>0)u=await upImg('pFile');else if(id&&allP[id].image)u=allP[id].image;const data={parentId:d,title:t,image:u,contact:document.getElementById('pPhone').value,details:document.getElementById('pDesc').value,timestamp:Date.now()};if(id)db.ref('posts/'+id).update(data);else db.ref('posts').push(data);resPost();load(0)}
-        function editP(k){const p=allP[k];document.getElementById('editId').value=k;document.getElementById('formTitle').innerText='Edit';document.getElementById('btnSubmit').innerText='Update';document.getElementById('btnCancel').style.display='block';document.getElementById('pDest').value=p.parentId;document.getElementById('pTitle').value=p.title;document.getElementById('pPhone').value=p.contact;document.getElementById('pDesc').value=p.details;if(p.image){document.getElementById('imgPreview').style.display='block';document.querySelector('#imgPreview img').src=p.image}}
-        function resPost(){document.getElementById('editId').value='';document.getElementById('formTitle').innerText='New Post';document.getElementById('btnSubmit').innerText='Submit';document.getElementById('btnCancel').style.display='none';document.getElementById('imgPreview').style.display='none';document.getElementById('pTitle').value='';document.getElementById('pPhone').value='';document.getElementById('pDesc').value='';document.getElementById('pFile').value=''}
+        // ================= POSTS =================
+        let allP = {};
+        function renderDest() {
+            const s = document.getElementById('pDest');
+            const old = s.value;
+            s.innerHTML = '<option value="">-- Select --</option>';
+            if(Object.keys(cats).length) {
+                s.innerHTML += `<optgroup label="Home">`;
+                Object.entries(cats).forEach(([k, v]) => s.innerHTML += `<option value="${k}">${v.name}</option>`);
+                s.innerHTML += `</optgroup>`;
+            }
+            if(Object.keys(mens).length) {
+                s.innerHTML += `<optgroup label="Menu">`;
+                Object.entries(mens).forEach(([k, v]) => {
+                    s.innerHTML += `<option value="${k}" style="font-weight:bold">⚫ ${v.title}</option>`;
+                    if(v.submenus) Object.entries(v.submenus).forEach(([sk, sv]) => s.innerHTML += `<option value="${sk}">&nbsp;&nbsp;↳ ${sv.name}</option>`);
+                });
+                s.innerHTML += `</optgroup>`;
+            }
+            if(old) s.value = old;
+        }
 
-        // ================= NOTIFICATION LOGIC (এডিট ও ডিলিট ফিচার) =================
+        function getLoc(id) {
+            if(cats[id]) return `Home > ${cats[id].name}`;
+            if(mens[id]) return `Menu > ${mens[id].title}`;
+            for(let k in mens) if(mens[k].submenus && mens[k].submenus[id]) return `${mens[k].title} > ${mens[k].submenus[id].name}`;
+            return 'Unknown';
+        }
+
+        db.ref('posts').on('value', s => {
+            allP = s.val() || {};
+            const t = document.getElementById('pList');
+            t.innerHTML = '';
+            if(!s.exists()) { t.innerHTML = '<tr><td colspan="4">No Data</td></tr>'; return; }
+            Object.entries(allP).reverse().forEach(([k, v]) => {
+                t.innerHTML += `<tr><td>${v.image ? `<img src="${v.image}" class="post-img-thumb">` : '-'}</td><td>${v.title}</td><td>${getLoc(v.parentId)}</td><td><button class="btn btn-primary btn-sm me-1" onclick="editP('${k}')">Edit</button><button class="btn btn-danger btn-sm" onclick="if(confirm('Del?'))db.ref('posts/${k}').remove()">Del</button></td></tr>`;
+            });
+        });
+
+        async function subPost() {
+            const d = document.getElementById('pDest').value, t = document.getElementById('pTitle').value, id = document.getElementById('editId').value;
+            if(!d || !t) return alert('Required');
+            load(1);
+            let u = "";
+            if(document.getElementById('pFile').files.length > 0) u = await upImg('pFile');
+            else if(id && allP[id].image) u = allP[id].image;
+            const data = { parentId: d, title: t, image: u, contact: document.getElementById('pPhone').value, details: document.getElementById('pDesc').value, timestamp: Date.now() };
+            if(id) db.ref('posts/' + id).update(data);
+            else db.ref('posts').push(data);
+            resPost();
+            load(0);
+        }
+
+        function editP(k) {
+            const p = allP[k];
+            document.getElementById('editId').value = k;
+            document.getElementById('formTitle').innerText = 'Edit';
+            document.getElementById('btnSubmit').innerText = 'Update';
+            document.getElementById('btnCancel').style.display = 'block';
+            document.getElementById('pDest').value = p.parentId;
+            document.getElementById('pTitle').value = p.title;
+            document.getElementById('pPhone').value = p.contact;
+            document.getElementById('pDesc').value = p.details;
+            if(p.image) {
+                document.getElementById('imgPreview').style.display = 'block';
+                document.querySelector('#imgPreview img').src = p.image;
+            }
+        }
+
+        function resPost() {
+            document.getElementById('editId').value = '';
+            document.getElementById('formTitle').innerText = 'New Post';
+            document.getElementById('btnSubmit').innerText = 'Submit';
+            document.getElementById('btnCancel').style.display = 'none';
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('pTitle').value = '';
+            document.getElementById('pPhone').value = '';
+            document.getElementById('pDesc').value = '';
+            document.getElementById('pFile').value = '';
+        }
+
+        // ================= NOTIFICATIONS =================
         let allNotifs = {};
         function sendNotif() {
             const t = document.getElementById('notifTitle').value;
             const b = document.getElementById('notifBody').value;
             const id = document.getElementById('notifEditId').value;
             if(!t) return alert('টাইটেল দিন');
-            if(id) {
-                db.ref('notifications/' + id).update({title: t, body: b});
-            } else {
-                db.ref('notifications').push({title: t, body: b, time: Date.now()});
-            }
+            if(id) db.ref('notifications/' + id).update({ title: t, body: b });
+            else db.ref('notifications').push({ title: t, body: b, time: Date.now() });
             resNotif();
             alert('সফল হয়েছে');
         }
@@ -541,20 +668,72 @@
                             <button class="btn btn-warning btn-sm text-white" onclick="editNotif('${k}')"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete?')) db.ref('notifications/${k}').remove()"><i class="fas fa-trash"></i></button>
                         </div>
-                        <div style="color:black">
-                            <b style="color:black">${n.title}</b><br>
-                            <small style="color:#444">${n.body || ''}</small>
-                        </div>
+                        <div><b>${n.title}</b><br><small>${n.body || ''}</small></div>
                     </li>`;
                 });
             }
             document.getElementById('oldNotif').innerHTML = h;
         });
 
-        // ================= OTHER LOGIC =================
-        db.ref('pending_posts').on('value',s=>{const l=document.getElementById('pendList');document.getElementById('pCount').innerText=s.numChildren();l.innerHTML='';if(!s.exists())return;s.forEach(c=>{const p=c.val();l.innerHTML+=`<div class="col-md-4"><div class="card border-warning"><div class="card-body"><h5>${p.title}</h5><button class="btn btn-success w-100" onclick="appP('${c.key}')">Approve</button><button class="btn btn-danger w-100 mt-1" onclick="db.ref('pending_posts/${c.key}').remove()">Del</button></div></div></div>`})});
-        function appP(k){db.ref('pending_posts/'+k).once('value',s=>{if(s.exists()){db.ref('posts').push(s.val());db.ref('pending_posts/'+k).remove()}})}
-        db.ref('feedbacks').on('value',s=>{const l=document.getElementById('feedList');l.innerHTML='';if(!s.exists())return;s.forEach(c=>{const f=c.val();l.innerHTML+=`<div class="list-group-item"><b>${f.name}</b>: ${f.message} <button class="btn-del position-relative float-end" onclick="db.ref('feedbacks/${c.key}').remove()">X</button></div>`})});
+        // ================= UPDATED PENDING (DETAILED) =================
+        db.ref('pending_posts').on('value', s => {
+            const l = document.getElementById('pendList');
+            document.getElementById('pCount').innerText = s.numChildren();
+            l.innerHTML = '';
+            if(!s.exists()) { l.innerHTML = '<div class="col-12 text-center py-5 text-muted">আবেদন নেই</div>'; return; }
+            s.forEach(c => {
+                const p = c.val();
+                const pImg = p.image ? `<img src="${p.image}" class="preview-img" onclick="window.open('${p.image}','_blank')">` : '<div class="bg-light text-center py-3 mb-2 small text-muted">ছবি নেই</div>';
+                l.innerHTML += `
+                <div class="col-md-6 col-lg-4">
+                    <div class="pending-card shadow-sm">
+                        <div class="card-header-custom"><span class="badge bg-success">${getLoc(p.parentId)}</span><small>${p.timestamp ? new Date(p.timestamp).toLocaleDateString('bn-BD') : ''}</small></div>
+                        <div class="p-3">
+                            ${pImg}
+                            <h6 class="fw-bold text-dark">${p.title}</h6>
+                            <p class="small text-secondary mb-2" style="white-space:pre-wrap;">${p.details || 'নেই'}</p>
+                            <div class="small text-primary mb-3"><b>মোবাইল: ${p.contact || 'নেই'}</b></div>
+                            <div class="row g-2">
+                                <div class="col-6"><button class="btn btn-success btn-sm w-100 fw-bold" onclick="appP('${c.key}')">Approve</button></div>
+                                <div class="col-6"><button class="btn btn-outline-danger btn-sm w-100 fw-bold" onclick="if(confirm('Delete?')) db.ref('pending_posts/${c.key}').remove()">Del</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        });
+
+        function appP(k) {
+            db.ref('pending_posts/' + k).once('value', s => {
+                if(s.exists()) {
+                    db.ref('posts').push(s.val());
+                    db.ref('pending_posts/' + k).remove();
+                    alert('অনুমোদিত হয়েছে!');
+                }
+            });
+        }
+
+        // ================= UPDATED FEEDBACK (DETAILED) =================
+        db.ref('feedbacks').on('value', s => {
+            const l = document.getElementById('feedList');
+            l.innerHTML = '';
+            if(!s.exists()) { l.innerHTML = '<div class="col-12 text-center py-5 text-muted">মতামত নেই</div>'; return; }
+            s.forEach(c => {
+                const f = c.val();
+                const fImg = f.image ? `<img src="${f.image}" class="preview-img" onclick="window.open('${f.image}','_blank')">` : '';
+                l.innerHTML += `
+                <div class="col-md-6">
+                    <div class="feedback-card border-info shadow-sm">
+                        <div class="card-header-custom" style="border-left-color: #0dcaf0;"><strong class="text-info">${f.subject || 'মতামত'}</strong><button class="btn btn-sm text-danger" onclick="if(confirm('Delete?')) db.ref('feedbacks/${c.key}').remove()"><i class="fas fa-trash"></i></button></div>
+                        <div class="p-3">
+                            ${fImg}
+                            <p class="text-dark small mb-2" style="white-space:pre-wrap;">${f.message}</p>
+                            <div class="d-flex justify-content-between pt-2 border-top small text-muted"><span><i class="fas fa-user me-1"></i>${f.name || 'Anonymous'}</span><span>${f.time || ''}</span></div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        });
     </script>
 </body>
 </html>
